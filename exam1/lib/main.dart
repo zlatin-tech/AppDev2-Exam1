@@ -7,7 +7,6 @@ void main() {
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -93,7 +92,7 @@ class _SecondScreenState extends State<SecondScreen> {
     {
       'title': 'Whatever this long name is',
       'price': 250,
-      'image': 'assets/book1.png'
+      'image': 'assets/book2.png'
     },
     {
       'title': 'Java',
@@ -101,6 +100,7 @@ class _SecondScreenState extends State<SecondScreen> {
       'image': 'assets/book3.png'
     },
    ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,24 +111,197 @@ class _SecondScreenState extends State<SecondScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [TextField(
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Search for a book'
-          ),
-        ),
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Search for a book'
+              ),
+            ),
             Text('Welcome, ${widget.name}!'),
             Expanded(child: ListView.builder(
               itemCount: books.length,
               itemBuilder: (context, index) {
-              return ListTile(
-              leading: Image.asset(books[index]['image']),
-              title: Text(books[index]['title']),
-              subtitle: Text('Price: \$${books[index]['price']}'),
-            );
-          })),
+                return ListTile(
+                  leading: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => BookDetails(
+                          title: books[index]['title'],
+                          image: books[index]['image'],
+                          price: books[index]['price'].toDouble(),
+                        )),
+                      );
+                    },
+                    child: Image.asset(books[index]['image']),
+                  ),
+                  title: Text(books[index]['title']),
+                  subtitle: Text('Price: \$${books[index]['price']}'),
+                );
+              }
+            )),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class BookDetails extends StatefulWidget {
+  final String title;
+  final String image;
+  final double price;
+
+  BookDetails({required this.title, required this.image, required this.price});
+
+  @override
+  _BookDetailsState createState() => _BookDetailsState();
+}
+
+class _BookDetailsState extends State<BookDetails> {
+  int quantity = 1;
+
+  void incrementQuantity() {
+    setState(() {
+      quantity++;
+    });
+  }
+
+  void decrementQuantity() {
+    setState(() {
+      if (quantity > 1) {
+        quantity--;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Book Details'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(widget.image),
+            SizedBox(height: 20),
+            Text(
+              widget.title,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Price: \$${widget.price*quantity}',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: decrementQuantity,
+                  icon: Icon(Icons.remove),
+                ),
+                Text(
+                  '$quantity',
+                  style: TextStyle(fontSize: 18),
+                ),
+                IconButton(
+                  onPressed: incrementQuantity,
+                  icon: Icon(Icons.add),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PaymentScreen(
+                    balance: widget.price * quantity,
+                  )
+                  ),
+                );
+              },
+              child: Text('Buy'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+class PaymentScreen extends StatelessWidget {
+  final double balance;
+
+  PaymentScreen({required this.balance});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Payment'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Balance: \$${balance.toStringAsFixed(2)}',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Choose a payment method:',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Thanks for the payment of \$${balance.toStringAsFixed(2)}, your request has been processed.'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              },
+              child: Text('PhonePe'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Thanks for the payment of \$${balance.toStringAsFixed(2)}, your request has been processed.'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              },
+              child: Text('PayPal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Thanks for the payment of \$${balance.toStringAsFixed(2)}, your request has been processed.'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              },
+              child: Text('Google Pay'),
+            ),
+          ],
+        ),
+      ),
+      //inspired by the flutter default app
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        child: Icon(Icons.home),
       ),
     );
   }
